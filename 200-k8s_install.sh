@@ -44,7 +44,7 @@ function install_k8s_tools {
  
 function deploy_k8s_master {
 	# deploy kubernetes cluster
- 	sudo kubeadm init --apiserver-advertise-address=$master_ip --pod-network-cidr=192.168.0.0/16
+ 	sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --cri-socket unix:///var/run/containerd/containerd.sock
 	# for non-root user, make sure that kubernetes config directory has the same permissions as kubernetes config file.
 	mkdir -p $HOME/.kube
 	sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -52,8 +52,7 @@ function deploy_k8s_master {
 	sudo chown $(id -u):$(id -g) $HOME/.kube/
 
 	#after this step, coredns status will be changed to running from pending
-	kubectl create -f https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml
-	kubectl create -f https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml
+	kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 	kubectl get nodes
 	kubectl get pods --namespace=kube-system
 }
